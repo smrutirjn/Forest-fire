@@ -5,7 +5,7 @@ import numpy as np
 import datetime 
 import pickle
 import pyrebase
-
+import random
 config = {
 	"apiKey": "AIzaSyB-TwUgMZvF_77H5nTECl4FsvgBqmSCLFE",
     "authDomain": "forest-a09b2.firebaseapp.com",
@@ -44,7 +44,13 @@ description = data['weather'][0]['description']
 a = {'x':x,'y':y,'mon':mon,'day':day,'ffmc':FFMC,'dmc':dmc,'dc':dc,'isi':isi, 'temp':temp,'hum':hum,'wind_speed':wind_speed,'rain':rain,'area':area}
 res=model.predict([[a['x'],a['y'],a['mon'],a['day'],a['ffmc'],a['dmc'],a['dc'],a['isi'],a['temp'],a['hum'],a['wind_speed'] ,a['rain']]])
 res=res/2
+
 @app.route("/",methods=['POST','GET'])
+def cover():
+	# res=model.predict([[a['x'],a['y'],a['mon'],a['day'],a['ffmc'],a['dmc'],a['dc'],a['isi'],0.35,0.100,0,a['rain']]])
+    return render_template('bjb.html')
+
+@app.route("/dashboard",methods=['POST','GET'])
 def hello():
 	# res=model.predict([[a['x'],a['y'],a['mon'],a['day'],a['ffmc'],a['dmc'],a['dc'],a['isi'],0.35,0.100,0,a['rain']]])
     return render_template('index.html', tem=b, dat =str(res[0]))
@@ -78,13 +84,70 @@ def predict():
     # else:
     #     return render_template('forest_fire.html',pred='Your Forest is safe.\n Probability of fire occuring is {}'.format(output),bhai="Your Forest is Safe for now")
 
+# @app.route("/modules",methods=['POST','GET'])
+# def detect(x):
+# 	t=x['sensor1']['temp']
+# 	if t>28:
+# 		t1=(t-28)*2
+# 	h=x['sensor1']['hum']
+# 	if h<80:
+# 		h1=(80-h)
+# 	h=x['sensor1']['smoke']
+# 	if (h>100):
+# 		s1=40
+# 	sum = t1+h1+s1
+# 	if sum>99:
+# 		sum = 99
+# 	sum = int(sum/10)
+# 	sum = (sum*10)+(random.random()*10)
+# 	return sum
 @app.route("/modules",methods=['POST','GET'])
 def hardware():
 	firebase = pyrebase.initialize_app(config)
 	db = firebase.database()
-	sens= db.child("Modules")child("hum")get()
-	for result in sens.each():
-    	print(type(result.val()))
+	sens= db.get().val()
+	s = dict(sens)	
+	
+	sum=0
+	t1=h1=s1=0
+	t=s['sensor1']['temp']
+	if t>28:
+		t1=(t-28)*2
+	h=s['sensor1']['hum']
+	if h<80:
+		h1=(80-h)
+	k=int(s['sensor1']['smoke'])
+	if (k>100):
+		s1=40
+	su = t1+h1+s1
+	if su>99:
+		su = 99
+	su = int(su/10)
+	su = (su*10)+(random.random()*10)
+	su = str(su)
+
+	sum=0
+	t1=h1=s1=0
+	t=s['sensor2']['temp']
+	if t>28:
+		t1=(t-28)*2
+	h=s['sensor2']['hum']
+	if h<80:
+		h1=(80-h)
+	k=int(s['sensor2']['smoke'])
+	if (k>100):
+		s1=40
+	sv = t1+h1+s1
+	if sv>99:
+		sv = 99
+	sv = int(sv/10)
+	sv = (sv*10)+(random.random()*10)
+	sv = str(sv)
+	det = {"sen1":su , "sen2": sv}
+	
+	return render_template('modules.html',vals=s,sm=det)
+	# return render_template('modules.html',vals=sens)
+	
 
 if __name__ == '__main__':
     app.run(debug=True)
